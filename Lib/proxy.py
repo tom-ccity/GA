@@ -19,7 +19,7 @@ def start_har(proxy, name):
 	proxy.new_har(name)
 
 def check_har(proxy, string):
-	print "Requests were made to the following URLS (displaying only the ones containing " +string+ " ):"
+	print "Requests were made to the following URLS (displaying only the ones containing " + string + " ):"
 	print "="*(81+len(string))
 	for entry in proxy.har['log']['entries']:
 		if  string in entry['request']['url']:
@@ -27,9 +27,6 @@ def check_har(proxy, string):
 
 def stop_server(server):
 	server.stop()
-	##driver = webdriver.Firefox(firefox_profile=profile)
-	##proxy.new_har("cineworld")
-	##driver.get("https://www.cineworld.co.uk/")
 
 
 
