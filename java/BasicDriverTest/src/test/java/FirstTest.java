@@ -26,6 +26,7 @@ import net.lightbody.bmp.client.ClientUtil;
 import net.lightbody.bmp.core.har.Har;
 
 import org.testng.Assert;
+import org.testng.Reporter;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -34,11 +35,16 @@ public class FirstTest {
 
     private static WebDriver driver;
     private static BrowserMobProxyServer server;
-    public static final String PageURL="https://www.cineworld.co.uk/";
+    public static String PageURL="https://www.cineworld.co.uk/";
+    public static final String Page_PL="https://www.cinema-city.pl/";
     public static final String PosterXPath="//div[@class='tab-pane collapsed active']//div[@aria-expanded='true']/div[@class='poster-container']";
 
     @BeforeClass
     public void setUp() {
+        if (System.getProperty("lang").equals("pl")){
+            PageURL=Page_PL;
+        }
+        System.out.println(PageURL);
         server = new BrowserMobProxyServer();
         server.start();
         Proxy proxy = ClientUtil.createSeleniumProxy(server);
@@ -65,14 +71,10 @@ public class FirstTest {
         driver.get(PageURL);
         waitForLoad(driver);
         int before= driver.findElements(By.xpath(PosterXPath)).size();
-        captureScreen("before");
-        //File scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
-        //FileUtils.copyFile(scrFile, new File("/scr_before.png"));
+        captureScreen("before.png");
         driver.findElement(By.xpath("//img[@alt='Show more films']")).click();
         int after= driver.findElements(By.xpath(PosterXPath)).size();
-        captureScreen("after");
-        //scrFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
-        //FileUtils.copyFile(scrFile, new File("/scr_after.png"));
+        captureScreen("after.png");
         Assert.assertTrue(after > before);
     }
 
@@ -88,9 +90,10 @@ public class FirstTest {
     public void manageHar() {
         Har har = server.getHar();
         List<HarEntry> X = har.getLog().getEntries();
+        Reporter.log("Please check below filtered proxy logs:");
         for(HarEntry he : X) {
             if (he.getRequest().getUrl().contains("google-analytics")) {
-                System.out.println(he.getRequest().getUrl() + "\n");
+                Reporter.log(he.getRequest().getUrl() + "\n");
             }
         }
     }
@@ -116,7 +119,9 @@ public class FirstTest {
         //String path;
         try {
             File source = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
-            FileUtils.copyFile(source, new File(name+".png"));
+            String fileloc=System.getProperty("user.dir")+"/"+name;
+            FileUtils.copyFile(source, new File(name));
+            Reporter.log("<br><img src='"+fileloc+"' height=400/></br>");
         }
         catch(IOException e) {
             System.out.println("Failed to capture screenshot: " + e.getMessage());
